@@ -4,7 +4,7 @@ import CurrencyRow from "@/components/CurrencyConverter";
 import fetchExchangeRate from "@/utils/fetchExchangeRate";
 import { ExchangeRateResponse } from "@/app/lib/definitions";
 
-const currencies = [
+export const currencies = [
   { code: "AUD", name: "Australian Dollar" },
   { code: "CAD", name: "Canadian Dollar" },
   { code: "JPY", name: "Japan" },
@@ -26,7 +26,7 @@ const safelyGetExchangeRate = (
 };
 
 const CurrencyConverter = () => {
-  const [selectedCurrency, setSelectedCurrency] = useState(currencies[5]);
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [amount, setAmount] = useState(1000);
   const [exchangeRates, setExchangeRates] = useState<
     ExchangeRateResponse["rates"]
@@ -37,7 +37,7 @@ const CurrencyConverter = () => {
     setIsLoading(true);
     const fetchRates = async () => {
       try {
-        const data = await fetchExchangeRate(selectedCurrency.code);
+        const data = await fetchExchangeRate(selectedCurrency);
         setExchangeRates(data.rates);
       } catch (error) {
         console.error("Failed to fetch exchange rates:", error);
@@ -46,48 +46,55 @@ const CurrencyConverter = () => {
       }
     };
     fetchRates();
-  }, [selectedCurrency.code]);
-  console.log("exchangeRates", exchangeRates);
+  }, [selectedCurrency]);
 
   const handleAmountChange = (newAmount: number) => {
     setAmount(newAmount);
   };
 
-  // console.log("selectedCurrency", selectedCurrency);
-  return (
-    <div className="max-w-md mx-auto rounded-lg overflow-scroll">
-      <div className="p-1 bg-blue-50">
-        <h2 className="text-lg font-semibold text-center">Convert</h2>
-      </div>
+  const handleBaseCurrencyChange = (newCurrency: string) => {
+    setSelectedCurrency(newCurrency);
+  };
 
-      <CurrencyRow
-        key={selectedCurrency.code}
-        currency={selectedCurrency.code}
-        amount={amount}
-        onAmountChange={handleAmountChange}
-        // symbol={selectedCurrency.flag}
-        defaultRow={true}
-      />
-      {currencies
-        .filter((currency) => currency.code !== selectedCurrency.code)
-        .map((currency) => (
+  return (
+    <div className="min-h-screen flex flex-col bg-white ">
+      <div className="w-full h-10 mx-auto mb-10 shadow-md flex items-center justify-center">
+        <h2 className="text-xl font-semibold">Convert</h2>
+      </div>
+      <div className="flex-grow overflow-auto p-5">
+        <div className="mb-20">
           <CurrencyRow
-            key={currency.code}
-            currency={currency.code}
-            rates={exchangeRates && exchangeRates[currency.code]}
-            amount={
-              isLoading ? (
-                <div className="animate-pulse flex space-x-4">
-                  <div className="h-5 w-20 bg-gray-300 rounded"></div>
-                </div>
-              ) : (
-                amount * safelyGetExchangeRate(exchangeRates, currency.code)
-              )
-            }
-            selectedCurrency={selectedCurrency.code}
-            defaultRow={false}
+            key={selectedCurrency}
+            currency={selectedCurrency}
+            amount={amount}
+            onAmountChange={handleAmountChange}
+            onBaseCurrencyChange={handleBaseCurrencyChange}
+            // symbol={selectedCurrency.flag}
+            defaultRow={true}
           />
-        ))}
+        </div>
+
+        {currencies
+          .filter((currency) => currency.code !== selectedCurrency)
+          .map((currency) => (
+            <CurrencyRow
+              key={currency.code}
+              currency={currency.code}
+              rates={exchangeRates && exchangeRates[currency.code]}
+              amount={
+                isLoading ? (
+                  <div className="animate-pulse flex space-x-4">
+                    <div className="h-5 w-20 bg-gray-300 rounded"></div>
+                  </div>
+                ) : (
+                  amount * safelyGetExchangeRate(exchangeRates, currency.code)
+                )
+              }
+              selectedCurrency={selectedCurrency}
+              defaultRow={false}
+            />
+          ))}
+      </div>
     </div>
   );
 };

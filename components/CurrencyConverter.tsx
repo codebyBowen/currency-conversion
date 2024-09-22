@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CurrenyAmountProps } from "@/app/lib/definitions";
 import data from "@/utils/Common-Currency.json";
+import { currencies } from "@/app/convert/page";
 
 const formatNumber = (
   num: number,
@@ -20,10 +21,29 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
     selectedCurrency,
     rates,
     onAmountChange,
+    onBaseCurrencyChange,
   } = props;
   const [inputAmount, setInputAmount] = useState<number>(
     typeof amount === "number" ? amount : 0
   );
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof amount === "number") {
@@ -39,10 +59,16 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
     }
   };
 
-  // console.log('formatNumber(inputAmount)', formatNumber(inputAmount))
+  const handleCurrencyChange = (newCurrency: string) => {
+    if (onBaseCurrencyChange) {
+      onBaseCurrencyChange(newCurrency);
+    }
+    setIsDropdownOpen(false);
+  };
+
   return (
     <div className="flex items-center justify-between p-4 rounded-lg max-w-md mx-auto border-solid border-2 border-slate-300 mb-3">
-      <div className="flex items-center w-1/4">
+      <div className="flex items-center space-x-2 w-1/3 relative" ref={dropdownRef}>
         <img
           src={`https://hatscripts.github.io/circle-flags/flags/${currency
             .substring(0, 2)
@@ -50,36 +76,53 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
           width="25"
           alt={`${currency} flag`}
         />
-        <div className="flex items-end justify-end w-1/2">
-          <span className="font-semibold">{currency}</span>
-          {defaultRow && (
-            <span className="text-gray-400">
-              <svg
-                className="w-4 h-4 inline-block"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        <span className="font-semibold">{currency}</span>
+        {defaultRow && (
+          <span
+            className="text-gray-400 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(!isDropdownOpen);
+            }}
+          >
+            <svg
+              className="w-4 h-4 inline-block"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </span>
+        )}
+        {isDropdownOpen && currencies && (
+          <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-300 rounded shadow-lg z-10 max-h-60 overflow-y-auto">
+            {currencies.map((curr) => (
+              <div
+                key={curr.code}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleCurrencyChange(curr.code)}
               >
-                <path d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </span>
-          )}
-        </div>
+                {curr.code}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-end w-1/2">
         {defaultRow ? (
-          <>
-            <>{`${data[currency].symbol_native}`}</>
+          <div className="flex items-center">
+            <span>{`${data[currency].symbol_native}`}</span>
             <input
               type="text"
               value={formatNumber(inputAmount, 0)}
               onChange={handleInputChange}
-              className="w-24 text-right font-semibold border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              className="w-24 text-right font-semibold focus:outline-none focus:border-blue-500"
             />
-          </>
+          </div>
         ) : typeof amount === "number" ? (
           <div className="text-right">
             <p className="w-auto text-right font-semibold">{`${
@@ -98,7 +141,11 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
       <div className="flex items-center">
         {" "}
         {defaultRow && (
-          <div onClick={() => onAmountChange(inputAmount)}>
+          <div
+            onClick={() =>
+              onAmountChange ? onAmountChange(inputAmount) : null
+            }
+          >
             <span className="text-gray-400">
               <svg
                 className="w-5 h-5 inline-block"

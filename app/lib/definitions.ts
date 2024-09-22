@@ -5,6 +5,7 @@ export interface CurrenyAmountProps {
   selectedCurrency?: string;
   rates?: number;
   onAmountChange?: (amount: number) => void;
+  onBaseCurrencyChange?: (baseCurrency: string) => void;
   defaultRow: boolean;
 }
 
