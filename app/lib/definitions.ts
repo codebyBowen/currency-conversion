@@ -1,6 +1,7 @@
+import data from "@/utils/Common-Currency.json";
 export interface CurrenyAmountProps {
   amount: number | React.ReactNode;
-  currency: string;
+  currency: keyof typeof data;
   symbol?: string;
   selectedCurrency?: string;
   rates?: number;

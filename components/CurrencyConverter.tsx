@@ -129,7 +129,7 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
               data[currency].symbol_native
             } ${formatNumber(amount)}`}</p>
             {
-              <p className="text-xs text-gray-500">{`1 ${selectedCurrency} = ${rates.toFixed(
+              <p className="text-xs text-gray-500">{`1 ${selectedCurrency} = ${rates?.toFixed(
                 4
               )} ${currency}`}</p>
             }
