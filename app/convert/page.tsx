@@ -5,12 +5,12 @@ import fetchExchangeRate from "@/utils/fetchExchangeRate";
 import { ExchangeRateResponse } from "@/app/lib/definitions";
 
 const currencies = [
-  { code: "AUD", name: "Australian Dollar"},
-  { code: "CAD", name: "Canadian Dollar"},
-  { code: "JPY", name: "Japan"},
-  { code: "GBP", name: "British Pound"},
-  { code: "NZD", name: "New Zealand Dollar"},
-  { code: "USD", name: "US Dollar"},
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "JPY", name: "Japan" },
+  { code: "GBP", name: "British Pound" },
+  { code: "NZD", name: "New Zealand Dollar" },
+  { code: "USD", name: "US Dollar" },
 ];
 
 const safelyGetExchangeRate = (
@@ -29,8 +29,8 @@ const CurrencyConverter = () => {
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[5]);
   const [amount, setAmount] = useState(1000);
   const [exchangeRates, setExchangeRates] = useState<
-    ExchangeRateResponse["rates"] | {}
-  >({});
+    ExchangeRateResponse["rates"]
+  >({ USD: 1 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -49,8 +49,13 @@ const CurrencyConverter = () => {
   }, [selectedCurrency.code]);
   console.log("exchangeRates", exchangeRates);
 
+  const handleAmountChange = (newAmount: number) => {
+    setAmount(newAmount);
+  };
+
+  // console.log("selectedCurrency", selectedCurrency);
   return (
-    <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-scroll">
+    <div className="max-w-md mx-auto rounded-lg overflow-scroll">
       <div className="p-1 bg-blue-50">
         <h2 className="text-lg font-semibold text-center">Convert</h2>
       </div>
@@ -59,26 +64,29 @@ const CurrencyConverter = () => {
         key={selectedCurrency.code}
         currency={selectedCurrency.code}
         amount={amount}
+        onAmountChange={handleAmountChange}
         // symbol={selectedCurrency.flag}
         defaultRow={true}
       />
       {currencies
         .filter((currency) => currency.code !== selectedCurrency.code)
         .map((currency) => (
-            <CurrencyRow
-              key={currency.code}
-              currency={currency.code}
-              amount={
-                isLoading ? (
-                  <div className="animate-pulse flex space-x-4">
-                    <div className="h-5 w-20 bg-gray-300 rounded"></div>
-                  </div>
-                ) : (
-                  amount * safelyGetExchangeRate(exchangeRates, currency.code)
-                )
-              }
-              defaultRow={false}
-            />
+          <CurrencyRow
+            key={currency.code}
+            currency={currency.code}
+            rates={exchangeRates && exchangeRates[currency.code]}
+            amount={
+              isLoading ? (
+                <div className="animate-pulse flex space-x-4">
+                  <div className="h-5 w-20 bg-gray-300 rounded"></div>
+                </div>
+              ) : (
+                amount * safelyGetExchangeRate(exchangeRates, currency.code)
+              )
+            }
+            selectedCurrency={selectedCurrency.code}
+            defaultRow={false}
+          />
         ))}
     </div>
   );
