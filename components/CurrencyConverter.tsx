@@ -82,7 +82,7 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
   return (
     <div
       className="flex items-center justify-between p-4 rounded-lg max-w-md mx-auto border-solid border-2 border-slate-300 mb-3"
-      onClick={handleClick}
+      onClick={() => (defaultRow ? null : handleClick())}
     >
       <div
         className="flex items-center space-x-2 w-1/3 relative"
