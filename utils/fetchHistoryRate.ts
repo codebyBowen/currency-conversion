@@ -21,7 +21,6 @@ const fetchExchangeRates = async (
     const { data } = response;
     const { rates, timestamp, base } = data;
 
-    console.log('rates', rates)
     return rates;
   } catch (error) {
     console.error("Error fetching history exchange rates:", error);
