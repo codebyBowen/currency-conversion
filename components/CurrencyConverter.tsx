@@ -22,6 +22,7 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
     rates,
     onAmountChange,
     onBaseCurrencyChange,
+    onCurrencyClick,
   } = props;
   const [inputAmount, setInputAmount] = useState<number>(
     typeof amount === "number" ? amount : 0
@@ -66,9 +67,27 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
     setIsDropdownOpen(false);
   };
 
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    // Only trigger onCurrencyClick if it's not the dropdown that was clicked
+    if (!isDropdownOpen) {
+      onCurrencyClick(currency);
+    }
+  };
+
+  const handleDropdownToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg max-w-md mx-auto border-solid border-2 border-slate-300 mb-3">
-      <div className="flex items-center space-x-2 w-1/3 relative" ref={dropdownRef}>
+    <div
+      className="flex items-center justify-between p-4 rounded-lg max-w-md mx-auto border-solid border-2 border-slate-300 mb-3"
+      onClick={handleClick}
+    >
+      <div
+        className="flex items-center space-x-2 w-1/3 relative"
+        ref={dropdownRef}
+      >
         <img
           src={`https://hatscripts.github.io/circle-flags/flags/${currency
             .substring(0, 2)
@@ -80,10 +99,7 @@ const CurrencyRow = (props: CurrenyAmountProps) => {
         {defaultRow && (
           <span
             className="text-gray-400 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDropdownOpen(!isDropdownOpen);
-            }}
+            onClick={handleDropdownToggle}
           >
             <svg
               className="w-4 h-4 inline-block"

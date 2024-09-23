@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 import CurrencyRow from "@/components/CurrencyConverter";
 import fetchExchangeRate from "@/utils/fetchExchangeRate";
 import { ExchangeRateResponse } from "@/app/lib/definitions";
+import LineChart from "@/components/LineChart";
+import { Modal } from "antd";
+import data from "@/utils/mock-historical-rates.json";
 
 export const currencies = [
   { code: "AUD", name: "Australian Dollar" },
@@ -26,11 +29,15 @@ const safelyGetExchangeRate = (
 };
 
 const CurrencyConverter = () => {
-  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [selectedCurrency, setSelectedCurrency] = useState<
+    "AUD" | "USD" | "JPY" | "NZD" | "GBP" | "CAD"
+  >("AUD");
   const [amount, setAmount] = useState(1000);
   const [exchangeRates, setExchangeRates] = useState<
     ExchangeRateResponse["rates"]
   >({ USD: 1 });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedModalCurrency, setSelectedModalCurrency] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,8 +59,15 @@ const CurrencyConverter = () => {
     setAmount(newAmount);
   };
 
-  const handleBaseCurrencyChange = (newCurrency: string) => {
+  const handleBaseCurrencyChange = (
+    newCurrency: "AUD" | "USD" | "JPY" | "NZD" | "GBP" | "CAD"
+  ) => {
     setSelectedCurrency(newCurrency);
+  };
+
+  const openModal = (currencyCode: string) => {
+    setSelectedModalCurrency(currencyCode);
+    setModalOpen(true);
   };
 
   return (
@@ -69,8 +83,8 @@ const CurrencyConverter = () => {
             amount={amount}
             onAmountChange={handleAmountChange}
             onBaseCurrencyChange={handleBaseCurrencyChange}
-            // symbol={selectedCurrency.flag}
             defaultRow={true}
+            onCurrencyClick={() => openModal(selectedCurrency)}
           />
         </div>
 
@@ -81,6 +95,7 @@ const CurrencyConverter = () => {
               key={currency.code}
               currency={currency.code}
               rates={exchangeRates && exchangeRates[currency.code]}
+              onCurrencyClick={() => openModal(currency.code)}
               amount={
                 isLoading ? (
                   <div className="animate-pulse flex space-x-4">
@@ -95,6 +110,18 @@ const CurrencyConverter = () => {
             />
           ))}
       </div>
+      <Modal
+        title={`${selectedCurrency} to ${selectedModalCurrency} Historical Rates`}
+        open={modalOpen}
+        onOk={() => setModalOpen(false)}
+        onCancel={() => setModalOpen(false)}
+      >
+        <LineChart
+          data={data[selectedModalCurrency]}
+          maxWidth={400}
+          selectedModalCurrency={selectedModalCurrency}
+        />
+      </Modal>
     </div>
   );
 };

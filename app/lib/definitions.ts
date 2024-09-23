@@ -6,7 +6,12 @@ export interface CurrenyAmountProps {
   selectedCurrency?: string;
   rates?: number;
   onAmountChange?: (amount: number) => void;
-  onBaseCurrencyChange?: (baseCurrency: string) => void;
+  onBaseCurrencyChange?: (
+    baseCurrency: "AUD" | "USD" | "JPY" | "NZD" | "GBP" | "CAD"
+  ) => void;
+  onCurrencyClick: (
+    baseCurrency: "AUD" | "USD" | "JPY" | "NZD" | "GBP" | "CAD"
+  ) => void;
   defaultRow: boolean;
 }
 
