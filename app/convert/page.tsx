@@ -111,15 +111,17 @@ const CurrencyConverter = () => {
           ))}
       </div>
       <Modal
-        title={`${selectedCurrency} to ${selectedModalCurrency} Historical Rates`}
+        title={`${selectedCurrency} to ${selectedModalCurrency} Trend`}
         open={modalOpen}
         onOk={() => setModalOpen(false)}
         onCancel={() => setModalOpen(false)}
       >
         <LineChart
-          data={data[selectedModalCurrency]}
+          // data={data[selectedModalCurrency]}
           maxWidth={400}
           selectedModalCurrency={selectedModalCurrency}
+          basedCurrency={selectedCurrency}
+          currentRate={exchangeRates && exchangeRates[selectedModalCurrency]}
         />
       </Modal>
     </div>
